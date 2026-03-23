@@ -417,10 +417,18 @@ function populateMonthFilter() {
     }).join('');
 }
   function loadExpensesFromSheet() {
-  fetch("https://script.google.com/macros/s/AKfycbxIxshgdypahxo7bflTZg_EUlCDj60JEbzm2MyxYT2W1tfSJA6gDBsj8hnLw7waPSVMdA/exec" + encodeURIComponent(currentUser.email))
+  fetch("https://script.google.com/macros/s/AKfycbxIxshgdypahxo7bflTZg_EUlCDj60JEbzm2MyxYT2W1tfSJA6gDBsj8hnLw7waPSVMdA/exec?user=" + encodeURIComponent(currentUser.email))
     .then(res => res.json())
     .then(data => {
-      expenses = data.filter(e => e.user === currentUser.email); // ✅ FIXED
+
+      expenses = data
+        .filter(e => e.user === currentUser.email)
+        .map(e => ({
+          ...e,
+          amount: Number(e.amount), // ✅ FIX
+          id: Date.now() + Math.random() // optional unique id
+        }));
+
       updateAll();
     });
 }
