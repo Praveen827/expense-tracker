@@ -353,22 +353,36 @@ document.getElementById('expDate').value = new Date().toISOString().split('T')[0
 
 function addExpense() {
   const name = document.getElementById('expName').value.trim();
-  const amount = parseFloat(document.getElementById('expAmount').value);
+  const amount = document.getElementById('expAmount').value;
   const cat = document.getElementById('expCat').value;
   const date = document.getElementById('expDate').value;
 
-  if (!name) { alert('Please enter an item name.'); return; }
-  if (!amount || amount <= 0) { alert('Please enter a valid amount.'); return; }
-  if (!date) { alert('Please select a date.'); return; }
+  if (!name || !amount || !date) {
+    alert("Fill all fields");
+    return;
+  }
 
-  expenses.push({ id: Date.now(), name, amount, cat, date });
+  fetch("https://script.google.com/macros/s/AKfycbxIxshgdypahxo7bflTZg_EUlCDj60JEbzm2MyxYT2W1tfSJA6gDBsj8hnLw7waPSVMdA/exec", {
+    method: "POST",
+    body: JSON.stringify({
+      name: name,
+      amount: amount,
+      cat: cat,
+      date: date,
+      user: currentUser
+    })
+  })
+  .then(res => res.text())
+  .then(() => {
+    alert("Saved ✅");
 
-  save();
+    // 🔥 reload data from sheet
+    loadExpensesFromSheet();
 
-  document.getElementById('expName').value = '';
-  document.getElementById('expAmount').value = '';
-
-  updateAll();
+    // clear input
+    document.getElementById('expName').value = '';
+    document.getElementById('expAmount').value = '';
+  });
 }
 
 function deleteExpense(id) {
@@ -408,6 +422,14 @@ function populateMonthFilter() {
       const [y,mo] = m.split('-');
       return `<option value="${m}" ${m===cur?'selected':''}>${MONTHS[+mo-1]} ${y}</option>`;
     }).join('');
+}
+function loadExpensesFromSheet() {
+  fetch("https://script.google.com/macros/s/AKfycbxIxshgdypahxo7bflTZg_EUlCDj60JEbzm2MyxYT2W1tfSJA6gDBsj8hnLw7waPSVMdA/exec?user=" + encodeURIComponent(currentUser.email))
+    .then(res => res.json())
+    .then(data => {
+      expenses = data.filter(e => e.user === currentUser);
+      updateAll();
+    });
 }
 
 function renderList() {
@@ -466,7 +488,7 @@ function escHtml(s) {
 }
 
 // INIT
-updateAll();
+loadExpensesFromSheet();
 </script>
 </body>
 </html>
