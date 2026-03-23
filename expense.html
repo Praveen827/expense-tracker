@@ -369,22 +369,15 @@ function addExpense() {
       amount: amount,
       cat: cat,
       date: date,
-      user: currentUser
+      user: currentUser.email   // ✅ FIXED
     })
   })
   .then(res => res.text())
   .then(() => {
     alert("Saved ✅");
-
-    // 🔥 reload data from sheet
     loadExpensesFromSheet();
-
-    // clear input
-    document.getElementById('expName').value = '';
-    document.getElementById('expAmount').value = '';
   });
 }
-
 function deleteExpense(id) {
   expenses = expenses.filter(e => e.id !== id);
   save();
@@ -423,11 +416,11 @@ function populateMonthFilter() {
       return `<option value="${m}" ${m===cur?'selected':''}>${MONTHS[+mo-1]} ${y}</option>`;
     }).join('');
 }
-function loadExpensesFromSheet() {
-  fetch("https://script.google.com/macros/s/AKfycbxIxshgdypahxo7bflTZg_EUlCDj60JEbzm2MyxYT2W1tfSJA6gDBsj8hnLw7waPSVMdA/exec?user=" + encodeURIComponent(currentUser.email))
+  function loadExpensesFromSheet() {
+  fetch("https://script.google.com/macros/s/AKfycbxIxshgdypahxo7bflTZg_EUlCDj60JEbzm2MyxYT2W1tfSJA6gDBsj8hnLw7waPSVMdA/exec" + encodeURIComponent(currentUser.email))
     .then(res => res.json())
     .then(data => {
-      expenses = data.filter(e => e.user === currentUser);
+      expenses = data.filter(e => e.user === currentUser.email); // ✅ FIXED
       updateAll();
     });
 }
