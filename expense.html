@@ -390,15 +390,19 @@ function updateAll() {
   populateMonthFilter();
   renderReport();
 }
-
-function updateSummary() {
-  const today = new Date().toISOString().split('T')[0];
+  function updateSummary() {
   const now = new Date();
+
+  const today =
+    now.getFullYear() + "-" +
+    String(now.getMonth() + 1).padStart(2, '0') + "-" +
+    String(now.getDate()).padStart(2, '0');
+
   const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   const yr = String(now.getFullYear());
 
   const todaySum = expenses
-    .filter(e => e.date.startsWith(today)) // ✅ FIX
+    .filter(e => e.date === today)
     .reduce((s,e) => s + e.amount, 0);
 
   const monthSum = expenses
@@ -424,24 +428,29 @@ function populateMonthFilter() {
       return `<option value="${m}" ${m===cur?'selected':''}>${MONTHS[+mo-1]} ${y}</option>`;
     }).join('');
 }
-  function loadExpensesFromSheet() {
+ function loadExpensesFromSheet() {
   fetch("https://script.google.com/macros/s/AKfycbxIxshgdypahxo7bflTZg_EUlCDj60JEbzm2MyxYT2W1tfSJA6gDBsj8hnLw7waPSVMdA/exec?user=" + encodeURIComponent(currentUser.email))
     .then(res => res.json())
     .then(data => {
 
       expenses = data
-  .filter(e => e.user === currentUser.email)
-  .map(e => {
-    // 🔥 FIX DATE FORMAT
-    let cleanDate = new Date(e.date).toISOString().split('T')[0];
+        .filter(e => e.user === currentUser.email)
+        .map(e => {
 
-    return {
-      ...e,
-      date: cleanDate,            // ✅ FIXED DATE
-      amount: Number(e.amount),   // ✅ FIXED NUMBER
-      id: Date.now() + Math.random()
-    };
-  });
+          let d = new Date(e.date);
+
+          let cleanDate =
+            d.getFullYear() + "-" +
+            String(d.getMonth() + 1).padStart(2, '0') + "-" +
+            String(d.getDate()).padStart(2, '0');
+
+          return {
+            ...e,
+            date: cleanDate,          // ✅ FIXED
+            amount: Number(e.amount),
+            id: Date.now() + Math.random()
+          };
+        });
 
       updateAll();
     });
