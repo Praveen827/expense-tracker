@@ -430,12 +430,18 @@ function populateMonthFilter() {
     .then(data => {
 
       expenses = data
-        .filter(e => e.user === currentUser.email)
-        .map(e => ({
-          ...e,
-          amount: Number(e.amount), // ✅ FIX
-          id: Date.now() + Math.random() // optional unique id
-        }));
+  .filter(e => e.user === currentUser.email)
+  .map(e => {
+    // 🔥 FIX DATE FORMAT
+    let cleanDate = new Date(e.date).toISOString().split('T')[0];
+
+    return {
+      ...e,
+      date: cleanDate,            // ✅ FIXED DATE
+      amount: Number(e.amount),   // ✅ FIXED NUMBER
+      id: Date.now() + Math.random()
+    };
+  });
 
       updateAll();
     });
