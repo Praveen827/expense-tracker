@@ -397,9 +397,17 @@ function updateSummary() {
   const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   const yr = String(now.getFullYear());
 
-  const todaySum = expenses.filter(e => e.date === today).reduce((s,e) => s+e.amount, 0);
-  const monthSum = expenses.filter(e => e.date.startsWith(ym)).reduce((s,e) => s+e.amount, 0);
-  const yearSum  = expenses.filter(e => e.date.startsWith(yr)).reduce((s,e) => s+e.amount, 0);
+  const todaySum = expenses
+    .filter(e => e.date.startsWith(today)) // ✅ FIX
+    .reduce((s,e) => s + e.amount, 0);
+
+  const monthSum = expenses
+    .filter(e => e.date.startsWith(ym))
+    .reduce((s,e) => s + e.amount, 0);
+
+  const yearSum  = expenses
+    .filter(e => e.date.startsWith(yr))
+    .reduce((s,e) => s + e.amount, 0);
 
   document.getElementById('todayTotal').innerHTML = fmt(todaySum) + '<span>today</span>';
   document.getElementById('monthTotal').innerHTML = fmt(monthSum) + '<span>/ month</span>';
